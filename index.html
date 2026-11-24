@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0f0e1a" />
+  <title>数羊羊 · 数羊助眠</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0f0e1a;
+      --bg-deep: #080712;
+      --ink: #e8e4f5;
+      --ink-soft: #9b94b8;
+      --moon: #c4b5fd;
+      --moon-deep: #7c6cf0;
+      --star: #fde68a;
+      --deep-sleep: #4338ca;
+      --rem: #a78bfa;
+      --light-sleep: #6366f1;
+      --foam: rgba(255, 255, 255, 0.06);
+      --paper: rgba(22, 20, 38, 0.85);
+      --line: rgba(196, 181, 253, 0.12);
+      --alert: #f87171;
+      --warn: #fbbf24;
+      --ok: #5ec4a0;
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+      --font-display: "Cormorant Garamond", "Noto Sans SC", serif;
+      --font-body: "Noto Sans SC", system-ui, sans-serif;
+      --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      font-family: var(--font-body);
+      color: var(--ink);
+      background:
+        radial-gradient(ellipse 120% 80% at 50% -20%, rgba(124, 108, 240, 0.35) 0%, transparent 55%),
+        radial-gradient(circle at 85% 15%, rgba(253, 230, 138, 0.08) 0%, transparent 30%),
+        radial-gradient(circle at 10% 90%, rgba(67, 56, 202, 0.2) 0%, transparent 40%),
+        linear-gradient(180deg, var(--bg), var(--bg-deep));
+      background-attachment: fixed;
+    }
+
+    body {
+      padding: calc(10px + var(--safe-top)) 14px calc(20px + var(--safe-bottom));
+    }
+
+    .app { max-width: 440px; margin: 0 auto; }
+
+    .brand {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: 14px;
+      animation: rise 0.6s ease both;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-family: var(--font-display);
+      font-size: clamp(2.2rem, 9vw, 2.8rem);
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      color: var(--moon);
+      line-height: 1;
+    }
+
+    .brand .tag {
+      font-size: 0.68rem;
+      letter-spacing: 0.12em;
+      color: var(--ink-soft);
+      font-family: var(--font-mono);
+    }
+
+    .score-card {
+      position: relative;
+      padding: 22px 20px 18px;
+      border-radius: 20px;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      backdrop-filter: blur(12px);
+      margin-bottom: 14px;
+      overflow: hidden;
+      animation: rise 0.7s ease 0.05s both;
+    }
+
+    .score-card::before {
+      content: "";
+      position: absolute;
+      top: -40%;
+      right: -20%;
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(196, 181, 253, 0.15), transparent 70%);
+      pointer-events: none;
+    }
+
+    .score-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .grade-badge {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      font-family: var(--font-display);
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #fff;
+      flex-shrink: 0;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    }
+
+    .score-main { flex: 1; min-width: 0; }
+
+    .score-value {
+      font-family: var(--font-display);
+      font-size: 2.8rem;
+      font-weight: 700;
+      line-height: 1;
+      color: var(--ink);
+    }
+
+    .score-value span { font-size: 1rem; color: var(--ink-soft); font-family: var(--font-body); }
+
+    #grade-label {
+      font-size: 0.85rem;
+      color: var(--moon);
+      margin-top: 2px;
+    }
+
+    #summary-text {
+      font-size: 0.78rem;
+      color: var(--ink-soft);
+      margin-top: 8px;
+      font-family: var(--font-mono);
+    }
+
+    .quality-banner {
+      margin-top: 12px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      font-size: 0.82rem;
+      line-height: 1.45;
+    }
+    .quality-banner.hidden { display: none; }
+    .quality-banner.ok { background: rgba(94, 196, 160, 0.12); color: var(--ok); }
+    .quality-banner.warn { background: rgba(251, 191, 36, 0.12); color: var(--warn); }
+    .quality-banner.bad { background: rgba(248, 113, 113, 0.12); color: var(--alert); }
+
+    .stage-section { margin-top: 14px; }
+    .stage-label {
+      font-size: 0.72rem;
+      color: var(--ink-soft);
+      margin-bottom: 6px;
+      display: flex;
+      gap: 12px;
+    }
+    .stage-label span::before {
+      content: "";
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 2px;
+      margin-right: 4px;
+      vertical-align: middle;
+    }
+    .stage-label .d::before { background: var(--deep-sleep); }
+    .stage-label .r::before { background: var(--rem); }
+    .stage-label .l::before { background: var(--light-sleep); }
+
+    #stage-bar {
+      display: flex;
+      height: 10px;
+      border-radius: 5px;
+      overflow: hidden;
+      background: var(--foam);
+    }
+    .stage { height: 100%; transition: width 0.4s ease; }
+    .stage.deep { background: var(--deep-sleep); }
+    .stage.rem { background: var(--rem); }
+    .stage.light { background: var(--light-sleep); }
+    .stage-empty { width: 100%; text-align: center; font-size: 0.7rem; color: var(--ink-soft); line-height: 10px; }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 14px;
+      animation: rise 0.75s ease 0.1s both;
+    }
+
+    .metric {
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: var(--paper);
+      border: 1px solid var(--line);
+    }
+
+    .metric .label {
+      font-size: 0.72rem;
+      color: var(--ink-soft);
+      margin-bottom: 4px;
+    }
+
+    .metric .value {
+      font-family: var(--font-mono);
+      font-size: 1.05rem;
+      font-weight: 500;
+    }
+
+    .metric.warn .value { color: var(--warn); }
+    .metric.bad .value { color: var(--alert); }
+
+    .tab-nav {
+      display: flex;
+      gap: 4px;
+      padding: 4px;
+      border-radius: 14px;
+      background: var(--foam);
+      margin-bottom: 12px;
+    }
+
+    .tab-btn {
+      flex: 1;
+      border: none;
+      background: transparent;
+      color: var(--ink-soft);
+      padding: 8px 4px;
+      border-radius: 10px;
+      font-size: 0.72rem;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      font-family: var(--font-body);
+    }
+
+    .tab-btn.active {
+      background: var(--paper);
+      color: var(--moon);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .tab-icon { font-size: 1rem; }
+
+    .panel { display: none; animation: fade 0.3s ease; }
+    .panel.active { display: block; }
+
+    .check-row {
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      margin-bottom: 8px;
+    }
+
+    .check-head {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      margin-bottom: 6px;
+    }
+
+    .check-value { font-family: var(--font-mono); color: var(--moon); }
+
+    .check-bar {
+      height: 4px;
+      background: var(--foam);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .check-fill { height: 100%; border-radius: 2px; transition: width 0.5s ease; }
+
+    .check-note {
+      font-size: 0.68rem;
+      color: var(--ink-soft);
+      margin-top: 4px;
+      display: block;
+    }
+
+    .check-row.warn { border-color: rgba(251, 191, 36, 0.25); }
+    .check-row.bad { border-color: rgba(248, 113, 113, 0.25); }
+
+    .advice-card {
+      padding: 14px 16px;
+      border-radius: 14px;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      margin-bottom: 10px;
+    }
+
+    .advice-card h3 {
+      margin: 0 0 8px;
+      font-size: 0.95rem;
+      color: var(--moon);
+      font-weight: 600;
+    }
+
+    .advice-card ul {
+      margin: 0;
+      padding-left: 1.1em;
+      font-size: 0.82rem;
+      line-height: 1.55;
+      color: var(--ink-soft);
+    }
+
+    .advice-card li { margin-bottom: 4px; }
+
+    .trend-wrap {
+      padding: 12px;
+      border-radius: 14px;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      margin-bottom: 12px;
+    }
+
+    .trend-wrap h4 {
+      margin: 0 0 8px;
+      font-size: 0.78rem;
+      color: var(--ink-soft);
+      font-weight: 500;
+    }
+
+    #trend-chart { width: 100%; height: 64px; display: block; }
+
+    .week-stat {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 14px;
+      border-radius: 12px;
+      background: var(--foam);
+      margin-bottom: 10px;
+      font-size: 0.82rem;
+    }
+
+    .week-stat strong {
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      color: var(--moon);
+    }
+
+    .history-row {
+      display: grid;
+      grid-template-columns: 1fr auto auto auto;
+      gap: 8px;
+      align-items: center;
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--paper);
+      margin-bottom: 6px;
+      cursor: pointer;
+      color: var(--ink);
+      font-family: var(--font-body);
+      text-align: left;
+    }
+
+    .history-row.active { border-color: var(--moon-deep); background: rgba(124, 108, 240, 0.12); }
+
+    .hist-date { font-size: 0.82rem; }
+    .hist-grade {
+      width: 26px;
+      height: 26px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #fff;
+    }
+    .hist-score { font-family: var(--font-mono); font-size: 0.85rem; color: var(--moon); }
+    .hist-dur { font-size: 0.75rem; color: var(--ink-soft); font-family: var(--font-mono); }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .btn {
+      border: 1px solid var(--line);
+      background: var(--paper);
+      color: var(--ink);
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-size: 0.82rem;
+      cursor: pointer;
+      font-family: var(--font-body);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--moon-deep), #5b21b6);
+      border-color: transparent;
+      color: #fff;
+      font-weight: 500;
+    }
+
+    .btn-sm { padding: 7px 10px; font-size: 0.75rem; }
+
+    .settings-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+
+    .settings-row label {
+      flex: 1;
+      min-width: 100px;
+      font-size: 0.75rem;
+      color: var(--ink-soft);
+    }
+
+    .settings-row select,
+    .settings-row input {
+      width: 100%;
+      margin-top: 4px;
+      padding: 8px 10px;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      background: var(--paper);
+      color: var(--ink);
+      font-family: var(--font-body);
+    }
+
+    .warnings p {
+      margin: 4px 0;
+      font-size: 0.78rem;
+      color: var(--alert);
+    }
+
+    .empty {
+      text-align: center;
+      color: var(--ink-soft);
+      font-size: 0.85rem;
+      padding: 24px 12px;
+    }
+
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      margin-bottom: 8px;
+      font-size: 0.82rem;
+    }
+
+    .toggle-row input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--moon-deep);
+    }
+
+    .status-line {
+      font-size: 0.72rem;
+      color: var(--ink-soft);
+      font-family: var(--font-mono);
+      margin: 4px 0 10px;
+      min-height: 1.2em;
+    }
+
+    .section-title {
+      font-size: 0.78rem;
+      color: var(--moon);
+      margin: 12px 0 8px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+    }
+
+    .hidden { display: none !important; }
+
+    .condition-callouts {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 10px;
+    }
+
+    .condition-callout {
+      flex: 1;
+      min-width: 90px;
+      padding: 8px 10px;
+      border-radius: 10px;
+      background: var(--foam);
+      border: 1px solid var(--line);
+      font-size: 0.72rem;
+    }
+
+    .condition-callout.warn {
+      border-color: rgba(248, 113, 113, 0.35);
+      background: rgba(248, 113, 113, 0.08);
+    }
+
+    .callout-label { display: block; color: var(--ink-soft); margin-bottom: 2px; }
+    .callout-value { font-family: var(--font-mono); color: var(--moon); font-weight: 500; }
+
+    .risk-block { margin-bottom: 10px; }
+
+    .risk-banner {
+      padding: 10px 12px;
+      border-radius: 10px;
+      margin-bottom: 6px;
+      font-size: 0.8rem;
+      line-height: 1.45;
+    }
+
+    .risk-banner.moderate {
+      background: rgba(251, 191, 36, 0.12);
+      border: 1px solid rgba(251, 191, 36, 0.25);
+      color: var(--warn);
+    }
+
+    .risk-banner.high {
+      background: rgba(248, 113, 113, 0.12);
+      border: 1px solid rgba(248, 113, 113, 0.25);
+      color: var(--alert);
+    }
+
+    .risk-banner p { margin: 4px 0 0; font-size: 0.75rem; opacity: 0.9; }
+
+    .clinical-summary {
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: rgba(124, 108, 240, 0.1);
+      border: 1px solid rgba(124, 108, 240, 0.2);
+      font-size: 0.78rem;
+      color: var(--ink-soft);
+      margin-bottom: 10px;
+      line-height: 1.5;
+    }
+
+    .disclaimer {
+      font-size: 0.68rem;
+      color: var(--ink-soft);
+      line-height: 1.45;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: var(--foam);
+      margin-top: 10px;
+      opacity: 0.85;
+    }
+
+    .advice-card.condition-card {
+      border-color: rgba(124, 108, 240, 0.3);
+      background: rgba(124, 108, 240, 0.08);
+    }
+
+    #status {
+      text-align: center;
+      font-size: 0.68rem;
+      color: var(--ink-soft);
+      font-family: var(--font-mono);
+      min-height: 1.2em;
+      margin-top: 8px;
+    }
+
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fade {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    /* Watch / Wear OS round / Apple Watch WebView */
+    @media (max-width: 280px), (max-height: 300px) {
+      body { padding: 6px 8px; }
+      .brand h1 { font-size: 1.4rem; }
+      .brand .tag { display: none; }
+      .score-value { font-size: 2rem; }
+      .grade-badge { width: 40px; height: 40px; font-size: 1.2rem; }
+      .metrics { grid-template-columns: 1fr; }
+      .tab-label { display: none; }
+      .tab-btn { padding: 6px 2px; }
+      .btn { padding: 8px 10px; font-size: 0.72rem; }
+      .history-row { grid-template-columns: 1fr auto auto; }
+      .hist-dur { display: none; }
+      .settings-row label { min-width: 80px; }
+      .section-title { margin-top: 8px; }
+      .trend-wrap { display: none; }
+      .actions { gap: 6px; }
+    }
+
+    /* Round watch faces (Wear OS) */
+    @media (max-width: 240px) and (max-height: 240px) {
+      .score-card { padding: 14px 12px; }
+      .stage-section { display: none; }
+      .toggle-row { font-size: 0.72rem; padding: 8px 10px; }
+    }
+
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="brand">
+      <h1>数羊羊</h1>
+      <span class="tag">数羊助眠 · 监测 · 分析 · 建议</span>
+    </header>
+
+    <section class="score-card">
+      <div class="score-row">
+        <div id="grade-badge" class="grade-badge">—</div>
+        <div class="score-main">
+          <div class="score-value"><span id="score-value">—</span> <span>/ 100</span></div>
+          <div id="grade-label">暂无记录</div>
+        </div>
+      </div>
+      <p id="summary-text">记录睡眠数据，获取质量评分与个性化建议。</p>
+      <div id="quality-banner" class="quality-banner hidden"></div>
+      <div id="condition-callouts" class="condition-callouts hidden"></div>
+      <div class="stage-section">
+        <div class="stage-label">
+          <span class="d">深睡</span><span class="r">REM</span><span class="l">浅睡</span>
+        </div>
+        <div id="stage-bar"><div class="stage-empty">—</div></div>
+      </div>
+    </section>
+
+    <div class="metrics">
+      <div class="metric"><div class="label">睡眠时长</div><div class="value" id="metric-totalMinutes">—</div></div>
+      <div class="metric"><div class="label">深睡占比</div><div class="value" id="metric-deepPct">—</div></div>
+      <div class="metric"><div class="label">REM 占比</div><div class="value" id="metric-remPct">—</div></div>
+      <div class="metric"><div class="label">睡眠效率</div><div class="value" id="metric-efficiency">—</div></div>
+    </div>
+
+    <nav id="tab-nav" class="tab-nav" aria-label="主导航"></nav>
+
+    <div id="panel-overview" class="panel active">
+      <div class="trend-wrap">
+        <h4>近 7 晚趋势</h4>
+        <canvas id="trend-chart" width="400" height="64"></canvas>
+      </div>
+      <div class="settings-row">
+        <label>档案
+          <select id="profile-select"></select>
+        </label>
+        <label>目标就寝
+          <input id="bed-hour" type="number" min="20" max="26" step="1" value="23" />
+        </label>
+        <label>目标起床
+          <input id="wake-hour" type="number" min="5" max="10" step="1" value="7" />
+        </label>
+      </div>
+
+      <div id="symptom-section" class="hidden">
+        <p class="section-title">症状自评（辅助筛查）</p>
+        <div id="symptoms-osa">
+          <div class="toggle-row">
+            <span>夜间打鼾</span>
+            <input id="symptom-snoring" type="checkbox" />
+          </div>
+          <div class="toggle-row">
+            <span>日间嗜睡</span>
+            <input id="symptom-sleepiness" type="checkbox" />
+          </div>
+        </div>
+        <div id="symptoms-parkinson" class="hidden">
+          <div class="toggle-row">
+            <span>夜间震颤</span>
+            <input id="symptom-tremor" type="checkbox" />
+          </div>
+          <div class="toggle-row">
+            <span>梦中动作/坠床</span>
+            <input id="symptom-rbd" type="checkbox" />
+          </div>
+        </div>
+      </div>
+
+      <p class="section-title">提醒与唤醒</p>
+      <div class="toggle-row">
+        <span>睡前就寝提醒</span>
+        <input id="bedtime-reminder" type="checkbox" checked />
+      </div>
+      <div class="toggle-row">
+        <span>起床自然唤醒</span>
+        <input id="wake-natural" type="checkbox" checked />
+      </div>
+      <div class="settings-row">
+        <label>提前唤醒（分钟）
+          <input id="wake-lead" type="number" min="5" max="60" step="5" value="30" />
+        </label>
+      </div>
+      <p id="reminder-status" class="status-line">—</p>
+      <div class="actions">
+        <button type="button" id="btn-reminders" class="btn btn-sm">同步提醒排程</button>
+      </div>
+
+      <p class="section-title">健康数据</p>
+      <p id="health-status" class="status-line">—</p>
+      <div class="actions">
+        <button type="button" id="btn-health" class="btn btn-sm">从健康应用导入</button>
+      </div>
+
+      <div class="actions">
+        <button type="button" id="btn-log" class="btn btn-primary">记录昨夜</button>
+        <button type="button" id="btn-week" class="btn btn-sm">导入 7 晚演示</button>
+        <button type="button" id="btn-sensors" class="btn btn-sm">启用传感</button>
+      </div>
+      <div class="actions">
+        <button type="button" id="btn-sim-great" class="btn btn-sm">模拟优质</button>
+        <button type="button" id="btn-sim-poor" class="btn btn-sm">模拟欠佳</button>
+        <button type="button" id="btn-clear" class="btn btn-sm">清除记录</button>
+      </div>
+    </div>
+
+    <div id="panel-analysis" class="panel">
+      <div id="analysis-list"></div>
+    </div>
+
+    <div id="panel-advice" class="panel">
+      <div id="advice-list"></div>
+    </div>
+
+    <div id="panel-history" class="panel">
+      <div class="week-stat">
+        <span>近 7 晚均分</span>
+        <strong id="week-avg">—</strong>
+      </div>
+      <div id="history-list"></div>
+    </div>
+
+    <p id="status" aria-live="polite"></p>
+  </div>
+  <script src="js/app.js"></script>
+</body>
+</html>

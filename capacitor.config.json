@@ -1,0 +1,25 @@
+{
+  "appId": "com.skat.shuyangyang",
+  "appName": "数羊羊",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  },
+  "ios": {
+    "contentInset": "automatic"
+  },
+  "android": {
+    "allowMixedContent": true
+  },
+  "plugins": {
+    "StatusBar": {
+      "style": "DARK",
+      "backgroundColor": "#0f0e1a"
+    },
+    "LocalNotifications": {
+      "smallIcon": "ic_stat_icon_config_sample",
+      "iconColor": "#7c6cf0",
+      "sound": "beep.wav"
+    }
+  }
+}
